@@ -1,3 +1,6 @@
+/*eslint-disable no-unused-vars */
+/*eslint-disable no-undef */
+
 import React, { useState } from 'react'
 import admissionService from '../services/admissionService'
 import { useParams, Link } from 'react-router-dom'
@@ -55,7 +58,6 @@ const Form = () => {
     const [formId, setFormId] = useState('')
     const [formState, setFormState] = useState(null)
 
-
     const hideWhenVisible = { display: formVisible ? 'none' : '' }
     const showWhenVisible = { display: formVisible ? '' : 'none' }
 
@@ -84,82 +86,32 @@ const Form = () => {
         }, [])
     }
 
-
-
-    const [name, setName] = useState('')
-    const [lastname, setLastname] = useState('')
-    const [identificationNumber, setIdentificationNumber] = useState('')
-    const [address, setAddress] = useState('')
-    const [location, setLocation] = useState('')
-    const [processAddress, setProcessAddress] = useState('')
-    const [trustee, setTrustee] = useState('')
-    const [citizenship, setCitizenship] = useState('')
     const [hazardAssesment, setHazardAssesment] = useState(false)
-    const [diaariNumber, setDiaariNumber] = useState('')
     const [datePrescribedForPsychiatricAssesment, setDatePrescribedForPsychiatricAssesment] = useState('')
-    const [nativeLanguage, setNativeLanguage] = useState('')
-    const [desiredLanguageOfBusiness, setDesiredLanguageOfBusiness] = useState('')
-    const [municipalityOfResidence, setMunicipalityOfResidence] = useState('')
     const [prosecuted, setProsecuted] = useState(false)
     const [deadlineForProsecution, setDeadlineForProsecution] = useState('')
     const [preTrialPoliceDepartment, setPreTrialPoliceDepartment] = useState('')
-    const [crime, setCrime] = useState('')
-    const [crimes, setCrimes] = useState('')
-    const [assistantsEmail, setAssistantsEmail] = useState('')
-    const [assistantsPhonenumber, setAssistantsPhonenumber] = useState('')
-    const [assistantsAddress, setAssistantsAddress] = useState('')
-    const [legalGuardianEmail, setLegalGuardianEmail] = useState('')
-    const [legalGuardianPhonenumber, setLegalGuardianPhonenumber] = useState('')
-    const [legalGuardianAddress, setLegalGuardianAddress] = useState('')
-    const [legalGuardianInstitute, setLegalGuardianInstitute] = useState('')
-    const [appealedDecision, setAppealedDecision] = useState('')
+
+    const [formValues, setFormValues] = useState({})
 
     const msg = useMessage()
 
     document.title = 'Mielentilatutkimuspyyntö'
 
-    const handleNameChange = (event) => {
-        setName(event.target.value)
+    const formFieldChange = event => {
+        const changedField = event.target.name
+        const changedValue = event.target.value
+
+        console.log('field ', changedField)
+        console.log('value ', changedValue)
+
+        setFormValues((formValues) => (
+            { ...formValues, [changedField]: changedValue }
+        ))
     }
 
-    const handleLastnameChange = (event) => {
-        setLastname(event.target.value)
-    }
-    const handleIdentificationNumberChange = (event) => {
-        setIdentificationNumber(event.target.value)
-    }
-    const handleAddressChange = (event) => {
-        setAddress(event.target.value)
-    }
-    const handleLocationChange = (event) => {
-        setLocation(event.target.value)
-    }
-    const handleProcessAddressChange = (event) => {
-        setProcessAddress(event.target.value)
-    }
-    const handleTrusteeChange = (event) => {
-        setTrustee(event.target.value)
-    }
-    const handleCitizenshipChange = (event) => {
-        setCitizenship(event.target.value)
-    }
-    const handleHazardAssesmentChange = (event) => {
-        setHazardAssesment(event.target.value)
-    }
-    const handleDiaariNumberChange = (event) => {
-        setDiaariNumber(event.target.value)
-    }
     const handleDatePrescribedForPsychiatricAssesmentChange = (newValue) => {
         setDatePrescribedForPsychiatricAssesment(newValue)
-    }
-    const handleNativeLanguageChange = (event) => {
-        setNativeLanguage(event.target.value)
-    }
-    const handleDesiredLanguageOfBusinessChange = (event) => {
-        setDesiredLanguageOfBusiness(event.target.value)
-    }
-    const handleMunicipalityOfResidenceChange = (event) => {
-        setMunicipalityOfResidence(event.target.value)
     }
     const handleProsecutedChange = (event) => {
         setProsecuted(event.target.value)
@@ -169,36 +121,6 @@ const Form = () => {
     }
     const handlePreTrialPoliceDepartmentChange = (event) => {
         setPreTrialPoliceDepartment(event.target.value)
-    }
-    const handleCrimeChange = (event) => {
-        setCrime(event.target.value)
-    }
-    const handleCrimesChange = (event) => {
-        setCrimes(event.target.value)
-    }
-    const handleAssistantsEmailChange = (event) => {
-        setAssistantsEmail(event.target.value)
-    }
-    const handleAssistantsPhonenumberChange = (event) => {
-        setAssistantsPhonenumber(event.target.value)
-    }
-    const handleAssistantsAddressChange = (event) => {
-        setAssistantsAddress(event.target.value)
-    }
-    const handleLegalGuardianEmailChange = (event) => {
-        setLegalGuardianEmail(event.target.value)
-    }
-    const handleLegalGuardianPhonenumberChange = (event) => {
-        setLegalGuardianPhonenumber(event.target.value)
-    }
-    const handleLegalGuardianAddressChange = (event) => {
-        setLegalGuardianAddress(event.target.value)
-    }
-    const handleLegalGuardianInstituteChange = (event) => {
-        setLegalGuardianInstitute(event.target.value)
-    }
-    const handleAppealedDecisionChange = (event) => {
-        setAppealedDecision(event.target.value)
     }
 
     const validateAssistantsEmail = () => {
@@ -426,50 +348,48 @@ const Form = () => {
                                 rowSpacing={2}
                             >
                                 <Grid item xs={5,5} >
-
                                     <TextField fullWidth
-                                        helperText='Etunimet' id='name' value={name}
-                                        onChange={handleNameChange}  variant='outlined' margin='normal'/>
-                                </Grid>
-                                <Grid item xs={1}/>
-                                <Grid item xs={5,5}>
-
-                                    <TextField fullWidth
-                                        helperText='Sukunimi' id='lastname' value={lastname}
-                                        onChange={handleLastnameChange} variant='outlined' margin='normal' />
-                                </Grid>
-                                <Grid item xs={5,5}>
-                                    <TextField fullWidth
-                                        helperText='Henkilötunnus' id='identificationNumber' value={identificationNumber}
-                                        onChange={handleIdentificationNumberChange} variant='outlined' margin='normal' />
+                                        name='name' helperText='Etunimet' id='name' value={formValues.name || ''}
+                                        onChange={formFieldChange}  variant='outlined' margin='normal'/>
                                 </Grid>
                                 <Grid item xs={1}/>
                                 <Grid item xs={5,5}>
                                     <TextField fullWidth
-                                        helperText='Kotiosoite' id='address' value={address}
-                                        onChange={handleAddressChange} variant='outlined' margin='normal' />
+                                        name='lastName' helperText='Sukunimi' id='lastname' value={lastname}
+                                        onChange={formFieldChange} variant='outlined' margin='normal' />
                                 </Grid>
                                 <Grid item xs={5,5}>
                                     <TextField fullWidth
-                                        helperText='Sijainti' id='location' value={location}
-                                        onChange={handleLocationChange} variant='outlined' margin='normal' />
-                                </Grid>
-                                <Grid item xs={1}/>
-                                <Grid item xs={5,5}>
-                                    <TextField fullWidth
-                                        helperText='Prosessiosoite' id='processAddress' value={processAddress}
-                                        onChange={handleProcessAddressChange} variant='outlined' margin='normal' />
-                                </Grid>
-                                <Grid item xs={5,5}>
-                                    <TextField fullWidth
-                                        helperText='Edunvalvoja' id='trustee' value={trustee}
-                                        onChange={handleTrusteeChange} variant='outlined' margin='normal' />
+                                        name='identificationNumber' helperText='Henkilötunnus' id='identificationNumber' value={identificationNumber}
+                                        onChange={formFieldChange} variant='outlined' margin='normal' />
                                 </Grid>
                                 <Grid item xs={1}/>
                                 <Grid item xs={5,5}>
                                     <TextField fullWidth
-                                        helperText='Kansalaisuus' id='citizenship' value={citizenship}
-                                        onChange={handleCitizenshipChange} variant='outlined' margin='normal' />
+                                        name='address' helperText='Kotiosoite' id='address' value={address}
+                                        onChange={formFieldChange} variant='outlined' margin='normal' />
+                                </Grid>
+                                <Grid item xs={5,5}>
+                                    <TextField fullWidth
+                                        name='location' helperText='Sijainti' id='location' value={location}
+                                        onChange={formFieldChange} variant='outlined' margin='normal' />
+                                </Grid>
+                                <Grid item xs={1}/>
+                                <Grid item xs={5,5}>
+                                    <TextField fullWidth
+                                        name='processAddress' helperText='Prosessiosoite' id='processAddress' value={processAddress}
+                                        onChange={formFieldChange} variant='outlined' margin='normal' />
+                                </Grid>
+                                <Grid item xs={5,5}>
+                                    <TextField fullWidth
+                                        name='trustee' helperText='Edunvalvoja' id='trustee' value={trustee}
+                                        onChange={formFieldChange} variant='outlined' margin='normal' />
+                                </Grid>
+                                <Grid item xs={1}/>
+                                <Grid item xs={5,5}>
+                                    <TextField fullWidth
+                                        name='citizenship' helperText='Kansalaisuus' id='citizenship' value={citizenship}
+                                        onChange={formFieldChange} variant='outlined' margin='normal' />
                                 </Grid>
                             </Grid>
                             <br></br>
@@ -482,7 +402,8 @@ const Form = () => {
                                 <Grid item xs={5,5}>
                                     <FormControl>
                                         <Select
-                                            onChange={handleHazardAssesmentChange}
+                                            name='hazardAssesment'
+                                            onChange={formFieldChange}
                                             value={hazardAssesment}
                                             variant = 'outlined'
                                             id='selectHazardAssesment'>
@@ -509,25 +430,25 @@ const Form = () => {
                                 </Grid>
                                 <Grid item xs={5,5}>
                                     <TextField fullWidth
-                                        helperText='Diaarinumero' id='diaariNumber' value={diaariNumber}
-                                        onChange={handleDiaariNumberChange} variant='outlined' margin='normal' />
+                                        name='diaariNumber' helperText='Diaarinumero' id='diaariNumber' value={diaariNumber}
+                                        onChange={formFieldChange} variant='outlined' margin='normal' />
                                 </Grid>
                                 <Grid item xs={1}/>
                                 <Grid item xs={5,5}>
                                     <TextField fullWidth
-                                        helperText='Tutkittavan äidinkieli'id='nativeLanguage' value={nativeLanguage}
-                                        onChange={handleNativeLanguageChange} variant='outlined' margin='normal' />
+                                        name='nativeLanguage' helperText='Tutkittavan äidinkieli'id='nativeLanguage' value={nativeLanguage}
+                                        onChange={formFieldChange} variant='outlined' margin='normal' />
                                 </Grid>
                                 <Grid item xs={5,5}>
                                     <TextField fullWidth
-                                        helperText='Tutkittavan toivoma asiointikieli' id='desiredLanguageOfBusiness'
-                                        onChange={handleDesiredLanguageOfBusinessChange} variant='outlined' margin='normal' />
+                                        name='desiredLanguageOfBusiness' helperText='Tutkittavan toivoma asiointikieli' id='desiredLanguageOfBusiness'
+                                        onChange={formFieldChange} variant='outlined' margin='normal' />
                                 </Grid>
                                 <Grid item xs={1}/>
                                 <Grid item xs={5,5}>
                                     <TextField fullWidth
-                                        helperText='Tutkittavan kotikunta' id='municipalityOfResidence' value={municipalityOfResidence}
-                                        onChange={handleMunicipalityOfResidenceChange} variant='outlined' margin='normal' />
+                                        name='municipalityOfResidence' helperText='Tutkittavan kotikunta' id='municipalityOfResidence' value={municipalityOfResidence}
+                                        onChange={formFieldChange} variant='outlined' margin='normal' />
                                 </Grid>
                                 <Grid item xs={5,5}>
                                     <FormControl >
@@ -554,63 +475,63 @@ const Form = () => {
                                 </Grid>
                                 <Grid item xs={5,5}>
                                     <TextField fullWidth
-                                        helperText='Vakavin teko (päätös tai välituomio)'id='crime' value={crime}
-                                        onChange={handleCrimeChange} variant='outlined' margin='normal' />
+                                        name='crime' helperText='Vakavin teko (päätös tai välituomio)'id='crime' value={crime}
+                                        onChange={formFieldChange} variant='outlined' margin='normal' />
                                 </Grid>
                                 <Grid item xs={1}/>
                                 <Grid item xs={5,5}>
                                     <TextField fullWidth
-                                        helperText='Muut kyseessä olevat teot, joista mielentilatutkimusta pyydetään' id='crimes' value={crimes}
-                                        onChange={handleCrimesChange} variant='outlined' margin='normal' />
+                                        name='crimes' helperText='Muut kyseessä olevat teot, joista mielentilatutkimusta pyydetään' id='crimes' value={crimes}
+                                        onChange={formFieldChange} variant='outlined' margin='normal' />
                                 </Grid>
                                 <Grid item xs={1}/>
                                 <Grid item xs={5,5}>
                                     <TextField fullWidth
-                                        helperText='Tutkittavan avustajan sähköposti' id='assistantsEmail' value={assistantsEmail}
-                                        onChange={handleAssistantsEmailChange} variant='outlined' margin='normal'
+                                        name='assistantsEmail' helperText='Tutkittavan avustajan sähköposti' id='assistantsEmail' value={assistantsEmail}
+                                        onChange={formFieldChange} variant='outlined' margin='normal'
                                     />
                                 </Grid>
                                 <Grid item xs={1}/>
                                 <Grid item xs={5,5}>
                                     <TextField fullWidth
-                                        helperText='Tutkittavan avustajan puhelinnumero' id='assistantsPhonenumber' value={assistantsPhonenumber}
-                                        onChange={handleAssistantsPhonenumberChange} variant='outlined' margin='normal' />
+                                        name='assistantsPhonenumber' helperText='Tutkittavan avustajan puhelinnumero' id='assistantsPhonenumber' value={assistantsPhonenumber}
+                                        onChange={formFieldChange} variant='outlined' margin='normal' />
                                 </Grid>
                                 <Grid item xs={1}/>
                                 <Grid item xs={5,5}>
                                     <TextField fullWidth
-                                        helperText='Tutkittavan avustajan osoite' id='assistantsAddress' value={assistantsAddress}
-                                        onChange={handleAssistantsAddressChange} variant='outlined' margin='normal' />
+                                        name='assistantsAddress' helperText='Tutkittavan avustajan osoite' id='assistantsAddress' value={assistantsAddress}
+                                        onChange={formFieldChange} variant='outlined' margin='normal' />
                                 </Grid>
                                 <Grid item xs={1}/>
                                 <Grid item xs={5,5}>
                                     <TextField fullWidth
-                                        helperText= 'Alaikäisen tutkittavan huoltajan/sosiaalitoimen sähköposti' id='legalGuardianEmail'
-                                        value={legalGuardianEmail} onChange={handleLegalGuardianEmailChange} variant='outlined' margin='normal'/>
+                                        name='legalGuardianEmail' helperText= 'Alaikäisen tutkittavan huoltajan/sosiaalitoimen sähköposti' id='legalGuardianEmail'
+                                        value={legalGuardianEmail} onChange={formFieldChange} variant='outlined' margin='normal'/>
                                 </Grid>
                                 <Grid item xs={1}/>
                                 <Grid item xs={5,5}>
                                     <TextField fullWidth
-                                        helperText='Alaikäisen tutkittavan huoltajan/sosiaalitoimen puhelinnumero' id='legalGuardianPhonenumber' value={legalGuardianPhonenumber}
-                                        onChange={handleLegalGuardianPhonenumberChange} variant='outlined' margin='normal' />
+                                        name='legalGuardianPhonenumber' helperText='Alaikäisen tutkittavan huoltajan/sosiaalitoimen puhelinnumero' id='legalGuardianPhonenumber' value={legalGuardianPhonenumber}
+                                        onChange={formFieldChange} variant='outlined' margin='normal' />
                                 </Grid>
                                 <Grid item xs={1}/>
                                 <Grid item xs={5,5}>
                                     <TextField fullWidth
-                                        helperText='Alaikäisen tutkittavan huoltajan/sosiaalitoimen osoite' id='legalGuardianAddress' value={legalGuardianAddress}
-                                        onChange={handleLegalGuardianAddressChange} variant='outlined' margin='normal' />
+                                        name='legalGuardianAddress' helperText='Alaikäisen tutkittavan huoltajan/sosiaalitoimen osoite' id='legalGuardianAddress' value={legalGuardianAddress}
+                                        onChange={formFieldChange} variant='outlined' margin='normal' />
                                 </Grid>
                                 <Grid item xs={1}/>
                                 <Grid item xs={5,5}>
                                     <TextField fullWidth
-                                        helperText='Alaikäisen tutkittavan huoltajan/sosiaalitoimen mahdollinen laitos' id='legalGuardianInstitute' value={legalGuardianInstitute}
-                                        onChange={handleLegalGuardianInstituteChange} variant='outlined' margin='normal' />
+                                        name='legalGuardianInstitute' helperText='Alaikäisen tutkittavan huoltajan/sosiaalitoimen mahdollinen laitos' id='legalGuardianInstitute' value={legalGuardianInstitute}
+                                        onChange={formFieldChange} variant='outlined' margin='normal' />
                                 </Grid>
                                 <Grid item xs={1}/>
                                 <Grid item xs={5,5}>
                                     <TextField fullWidth
-                                        helperText='Mikäli lähettäjä hovioikeus/korkein oikeus, mihin päätökseen haettu muutosta' id='appealedDecision' value={appealedDecision}
-                                        onChange={handleAppealedDecisionChange} variant='outlined' margin='normal' />
+                                        name='appealedDecision' helperText='Mikäli lähettäjä hovioikeus/korkein oikeus, mihin päätökseen haettu muutosta' id='appealedDecision' value={appealedDecision}
+                                        onChange={formFieldChange} variant='outlined' margin='normal' />
                                 </Grid>
                             </Grid>
 
