@@ -52,11 +52,13 @@ const BasicInformationForm = () => {
         }
 
         if (!msg.errorMessagesNotEmpty()) {
+            // formValues could change between sending request and response from backend, so email address is saved in var for msg
+            const emailAddress = formValues.email
             basicInformationService
                 .create(formValues)
                 .then(response => {
                     console.log(response.data)
-                    msg.setMsg(`Perustietojen lähettäminen onnistui! Linkki mielentilatutkimuspyynnön luomiseen lähetetty osoitteeseen: ${response.data.email}`, 7)
+                    msg.setMsg(`Perustietojen lähettäminen onnistui! Linkki mielentilatutkimuspyynnön luomiseen lähetetty osoitteeseen: ${emailAddress}`, 7)
                     setFormValues({})
 
                 })

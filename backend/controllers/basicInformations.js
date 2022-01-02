@@ -29,7 +29,7 @@ basinInformationsRouter.post('/basic_information_form', async (req, res) => {
             savedForm.email,
             savedForm.phoneNumber
         ]
-        res.json(response)
+        res.sendStatus(200)
         Mailer.sendLinkToAdmissionForm(savedForm.email, savedForm.id)
     }
 })
