@@ -1,5 +1,6 @@
 /*eslint-disable no-unused-vars */
 /*eslint-disable no-undef */
+/*eslint-disable react/display-name */
 
 import React, { useState } from 'react'
 import admissionService from '../services/admissionService'
@@ -22,12 +23,14 @@ const NotProsecuted = (props) => {
             <span>
                 <Grid item xs={5,5}>
                     <TextField fullWidth
-                        helperText='Jos syytettä ei ole nostettu, esitutkinnan suorittava poliisilaitos' id='preTrialPoliceDepartment' value={props.preTrialPoliceDepartment}
+                        name='preTrialPoliceDepartmentChange'
+                        helperText='Jos syytettä ei ole nostettu, esitutkinnan suorittava poliisilaitos' id='preTrialPoliceDepartment'
                         onChange={props.handlePreTrialPoliceDepartmentChange} variant='outlined' margin='normal' />
                 </Grid>
                 <Grid item xs={5,5}>
                     <LocalizationProvider dateAdapter={DateAdapter}>
                         <DesktopDatePicker
+                            name='deadlineForProsecution'
                             InputProps={{
                                 disableUnderline: true,
                             }}
@@ -58,6 +61,10 @@ const Form = () => {
     const [formId, setFormId] = useState('')
     const [formState, setFormState] = useState(null)
 
+    const [formValues, setFormValues] = useState({ preTrialPoliceDepartment: '' })
+
+    const [prescribedDate, setPrescribedDate] = useState('')
+
     const hideWhenVisible = { display: formVisible ? 'none' : '' }
     const showWhenVisible = { display: formVisible ? '' : 'none' }
 
@@ -80,56 +87,50 @@ const Form = () => {
     } else {
         useEffect(() => {
             basicInformationService.get(basicInformationId).then(res => {
-                console.log('res ', res)
                 setSenderInfo(res)
             })
         }, [])
     }
 
-    const [hazardAssesment, setHazardAssesment] = useState(false)
-    const [datePrescribedForPsychiatricAssesment, setDatePrescribedForPsychiatricAssesment] = useState('')
-    const [prosecuted, setProsecuted] = useState(false)
-    const [deadlineForProsecution, setDeadlineForProsecution] = useState('')
-    const [preTrialPoliceDepartment, setPreTrialPoliceDepartment] = useState('')
-
-    const [formValues, setFormValues] = useState({})
-
     const msg = useMessage()
 
     document.title = 'Mielentilatutkimuspyyntö'
 
-    const formFieldChange = event => {
+    const handleFormChange = event => {
         const changedField = event.target.name
-        const changedValue = event.target.value
-
-        console.log('field ', changedField)
-        console.log('value ', changedValue)
+        const newValue = event.target.value
 
         setFormValues((formValues) => (
-            { ...formValues, [changedField]: changedValue }
+            { ...formValues, [changedField]: newValue }
         ))
     }
 
-    const handleDatePrescribedForPsychiatricAssesmentChange = (newValue) => {
-        setDatePrescribedForPsychiatricAssesment(newValue)
+    const handlePrescribedDateChange = (newValue) => {
+        setPrescribedDate(newValue)
     }
-    const handleProsecutedChange = (event) => {
-        setProsecuted(event.target.value)
-    }
-    const handleDeadlineForProsecutionChange = (newValue) => {
-        setDeadlineForProsecution(newValue)
-    }
-    const handlePreTrialPoliceDepartmentChange = (event) => {
-        setPreTrialPoliceDepartment(event.target.value)
+
+    const isValidEmailAddress = (formField) => {
+        // only validated if field has been filled, it's not required
+        if (!formValues.formField) {
+            return true
+        }
+        if (formValues.formField.length > 0) {
+            if (!validator.isEmail(formValues.formField)) {
+                msg.setErrorMsg(`Kenttä ${formField} on virheellisesti täytetty`, 7)
+                return false
+            }
+        }
+        return true
     }
 
     const validateAssistantsEmail = () => {
-        if (!validator.isEmail(assistantsEmail) && assistantsEmail.length>0) {
-            msg.setErrorMsg('Avustajan sähköpostiosoite on virheellinen!', 7)
-            return true
-        } else {
-            return false
+        if (formValues.assistantsEmail.length > 0) {
+            if (!validator.isEmail(formValues.assistantsEmail)) {
+                msg.setErrorMsg('Avustajan sähköpostiosoite on virheellinen!', 7)
+                return true
+            }
         }
+        return false
     }
 
     const validateLegalGuardianEmail = () => {
@@ -216,83 +217,22 @@ const Form = () => {
             updatePerson(event)
         }
         else {
-
             event.preventDefault()
 
-            const createAdmission = {
-                formState : 'Odottaa tarkistusta',
-                name: name,
-                lastname: lastname,
-                identificationNumber: identificationNumber,
-                address: address,
-                location: location,
-                processAddress: processAddress,
-                trustee: trustee,
-                citizenship: citizenship,
-                hazardAssesment: hazardAssesment,
-                diaariNumber: diaariNumber,
-                datePrescribedForPsychiatricAssesment: datePrescribedForPsychiatricAssesment,
-                nativeLanguage: nativeLanguage,
-                desiredLanguageOfBusiness: desiredLanguageOfBusiness,
-                municipalityOfResidence: municipalityOfResidence,
-                prosecuted: prosecuted,
-                deadlineForProsecution: deadlineForProsecution,
-                preTrialPoliceDepartment: preTrialPoliceDepartment,
-                crime: crime,
-                crimes: crimes,
-                assistantsEmail: assistantsEmail,
-                assistantsPhonenumber: assistantsPhonenumber,
-                assistantsAddress: assistantsAddress,
-                legalGuardianEmail: legalGuardianEmail,
-                legalGuardianPhonenumber: legalGuardianPhonenumber,
-                legalGuardianAddress: legalGuardianAddress,
-                legalGuardianInstitute: legalGuardianInstitute,
-                appealedDecision: appealedDecision,
-                basicInformation: senderInfo.id
+            if (!isValidEmailAddress('assistantsEmail') || !isValidEmailAddress('legalGuardianEmail')) {
+                return
             }
 
-            const assistantError = validateAssistantsEmail()
-            const guardianError = validateLegalGuardianEmail()
-
-            if (!assistantError && !guardianError) {
-                admissionService
-                    .create(createAdmission)
-                    .then(response => {
-                        setFormId(response.data.id)
-                        toggleVisibility()
-
-                        setName('')
-                        setLastname('')
-                        setIdentificationNumber('')
-                        setAddress('')
-                        setLocation('')
-                        setProcessAddress('')
-                        setTrustee('')
-                        setCitizenship('')
-                        setHazardAssesment(false)
-                        setDiaariNumber('')
-                        setDatePrescribedForPsychiatricAssesment('')
-                        setNativeLanguage('')
-                        setDesiredLanguageOfBusiness('')
-                        setMunicipalityOfResidence('')
-                        setProsecuted(false)
-                        setDeadlineForProsecution('')
-                        setPreTrialPoliceDepartment('')
-                        setCrime('')
-                        setCrimes('')
-                        setAssistantsEmail('')
-                        setAssistantsPhonenumber('')
-                        setAssistantsAddress('')
-                        setLegalGuardianEmail('')
-                        setLegalGuardianPhonenumber('')
-                        setLegalGuardianAddress('')
-                        setLegalGuardianInstitute('')
-                        setAppealedDecision('')
-                    })
-                    .catch(() => {
-                        msg.setErrorMsg('Mielentilatutkimuspyynnön lähettämisessä tapahtui virhe!', 7)
-                    })
-            }
+            admissionService
+                .create({ ...formValues, basicInformation: senderInfo.id })
+                .then(response => {
+                    setFormId(response.data.id)
+                    toggleVisibility()
+                    setFormValues({})
+                })
+                .catch(() => {
+                    msg.setErrorMsg('Mielentilatutkimuspyynnön lähettämisessä tapahtui virhe!', 7)
+                })
         }
     }
 
@@ -342,6 +282,7 @@ const Form = () => {
 
                         <Typography variant={'h5'}>Tutkittavan henkilön yleistiedot:</Typography>
                         <p></p>
+                        {formValues.datePrescribedForPsychiatricAssesment || ''}
                         <form onSubmit={addPerson}>
                             <Grid
                                 container
@@ -350,46 +291,46 @@ const Form = () => {
                                 <Grid item xs={5,5} >
                                     <TextField fullWidth
                                         name='name' helperText='Etunimet' id='name' value={formValues.name || ''}
-                                        onChange={formFieldChange}  variant='outlined' margin='normal'/>
+                                        onChange={handleFormChange}  variant='outlined' margin='normal'/>
                                 </Grid>
                                 <Grid item xs={1}/>
                                 <Grid item xs={5,5}>
                                     <TextField fullWidth
-                                        name='lastName' helperText='Sukunimi' id='lastname' value={lastname}
-                                        onChange={formFieldChange} variant='outlined' margin='normal' />
+                                        name='lastname' helperText='Sukunimi' id='lastname' value={formValues.lastname || ''}
+                                        onChange={handleFormChange} variant='outlined' margin='normal' />
                                 </Grid>
                                 <Grid item xs={5,5}>
                                     <TextField fullWidth
-                                        name='identificationNumber' helperText='Henkilötunnus' id='identificationNumber' value={identificationNumber}
-                                        onChange={formFieldChange} variant='outlined' margin='normal' />
-                                </Grid>
-                                <Grid item xs={1}/>
-                                <Grid item xs={5,5}>
-                                    <TextField fullWidth
-                                        name='address' helperText='Kotiosoite' id='address' value={address}
-                                        onChange={formFieldChange} variant='outlined' margin='normal' />
-                                </Grid>
-                                <Grid item xs={5,5}>
-                                    <TextField fullWidth
-                                        name='location' helperText='Sijainti' id='location' value={location}
-                                        onChange={formFieldChange} variant='outlined' margin='normal' />
+                                        name='identificationNumber' helperText='Henkilötunnus' id='identificationNumber' value={formValues.identificationNumber || ''}
+                                        onChange={handleFormChange} variant='outlined' margin='normal' />
                                 </Grid>
                                 <Grid item xs={1}/>
                                 <Grid item xs={5,5}>
                                     <TextField fullWidth
-                                        name='processAddress' helperText='Prosessiosoite' id='processAddress' value={processAddress}
-                                        onChange={formFieldChange} variant='outlined' margin='normal' />
+                                        name='address' helperText='Kotiosoite' id='address' value={formValues.address || ''}
+                                        onChange={handleFormChange} variant='outlined' margin='normal' />
                                 </Grid>
                                 <Grid item xs={5,5}>
                                     <TextField fullWidth
-                                        name='trustee' helperText='Edunvalvoja' id='trustee' value={trustee}
-                                        onChange={formFieldChange} variant='outlined' margin='normal' />
+                                        name='location' helperText='Sijainti' id='location' value={formValues.location || ''}
+                                        onChange={handleFormChange} variant='outlined' margin='normal' />
                                 </Grid>
                                 <Grid item xs={1}/>
                                 <Grid item xs={5,5}>
                                     <TextField fullWidth
-                                        name='citizenship' helperText='Kansalaisuus' id='citizenship' value={citizenship}
-                                        onChange={formFieldChange} variant='outlined' margin='normal' />
+                                        name='processAddress' helperText='Prosessiosoite' id='processAddress' value={formValues.processAddress || ''}
+                                        onChange={handleFormChange} variant='outlined' margin='normal' />
+                                </Grid>
+                                <Grid item xs={5,5}>
+                                    <TextField fullWidth
+                                        name='trustee' helperText='Edunvalvoja' id='trustee' value={formValues.trustee || ''}
+                                        onChange={handleFormChange} variant='outlined' margin='normal' />
+                                </Grid>
+                                <Grid item xs={1}/>
+                                <Grid item xs={5,5}>
+                                    <TextField fullWidth
+                                        name='citizenship' helperText='Kansalaisuus' id='citizenship' value={formValues.citizenship || ''}
+                                        onChange={handleFormChange} variant='outlined' margin='normal' />
                                 </Grid>
                             </Grid>
                             <br></br>
@@ -403,8 +344,8 @@ const Form = () => {
                                     <FormControl>
                                         <Select
                                             name='hazardAssesment'
-                                            onChange={formFieldChange}
-                                            value={hazardAssesment}
+                                            onChange={handleFormChange}
+                                            value={formValues.hazardAssesment || false}
                                             variant = 'outlined'
                                             id='selectHazardAssesment'>
                                             <MenuItem id='0' value={true}> Kyllä</MenuItem>
@@ -421,40 +362,40 @@ const Form = () => {
                                                 disableUnderline: true,
                                             }}
                                             inputFormat="DD/MM/YYYY"
-                                            value={datePrescribedForPsychiatricAssesment}
-                                            onChange={handleDatePrescribedForPsychiatricAssesmentChange}
-                                            renderInput={(params) => <TextField id='date-picker' variant='filled' {...params} />}
+                                            value={prescribedDate}
+                                            onChange={handlePrescribedDateChange}
+                                            renderInput={(params) => <TextField name='datePrescribedForPsychiatricAssesment' id='date-picker' variant='filled' {...params} />}
                                         />
                                         <FormHelperText>Päivämäärä, jolla oikeus on määrännyt tutkittavan mielentilatutkimukseen</FormHelperText>
                                     </LocalizationProvider>
                                 </Grid>
                                 <Grid item xs={5,5}>
                                     <TextField fullWidth
-                                        name='diaariNumber' helperText='Diaarinumero' id='diaariNumber' value={diaariNumber}
-                                        onChange={formFieldChange} variant='outlined' margin='normal' />
+                                        name='diaariNumber' helperText='Diaarinumero' id='diaariNumber' value={formValues.diaariNumber || ''}
+                                        onChange={handleFormChange} variant='outlined' margin='normal' />
                                 </Grid>
                                 <Grid item xs={1}/>
                                 <Grid item xs={5,5}>
                                     <TextField fullWidth
-                                        name='nativeLanguage' helperText='Tutkittavan äidinkieli'id='nativeLanguage' value={nativeLanguage}
-                                        onChange={formFieldChange} variant='outlined' margin='normal' />
+                                        name='nativeLanguage' helperText='Tutkittavan äidinkieli'id='nativeLanguage' value={formValues.nativeLanguage || ''}
+                                        onChange={handleFormChange} variant='outlined' margin='normal' />
                                 </Grid>
                                 <Grid item xs={5,5}>
                                     <TextField fullWidth
                                         name='desiredLanguageOfBusiness' helperText='Tutkittavan toivoma asiointikieli' id='desiredLanguageOfBusiness'
-                                        onChange={formFieldChange} variant='outlined' margin='normal' />
+                                        onChange={handleFormChange} variant='outlined' margin='normal' />
                                 </Grid>
                                 <Grid item xs={1}/>
                                 <Grid item xs={5,5}>
                                     <TextField fullWidth
-                                        name='municipalityOfResidence' helperText='Tutkittavan kotikunta' id='municipalityOfResidence' value={municipalityOfResidence}
-                                        onChange={formFieldChange} variant='outlined' margin='normal' />
+                                        name='municipalityOfResidence' helperText='Tutkittavan kotikunta' id='municipalityOfResidence' value={formValues.municipalityOfResidence || ''}
+                                        onChange={handleFormChange} variant='outlined' margin='normal' />
                                 </Grid>
                                 <Grid item xs={5,5}>
                                     <FormControl >
                                         <Select
-                                            onChange={handleProsecutedChange}
-                                            value={prosecuted}
+                                            onChange={handleFormChange}
+                                            value={formValues.prosecuted || false}
                                             variant = 'outlined'
                                             id='selectIfProsecuted'>
                                             <MenuItem id='0' value={true}> Kyllä</MenuItem>
@@ -466,72 +407,77 @@ const Form = () => {
                                 <Grid item xs={1}/>
                                 <Grid item xs={12} >
                                     <NotProsecuted
-                                        prosecuted ={prosecuted}
-                                        deadlineForProsecution = {deadlineForProsecution}
-                                        handleDeadlineForProsecutionChange = {handleDeadlineForProsecutionChange}
-                                        preTrialPoliceDepartment = {preTrialPoliceDepartment}
-                                        handlePreTrialPoliceDepartmentChange = {handlePreTrialPoliceDepartmentChange}
+                                        formValues = {formValues}
+                                        prosecuted = {formValues.prosecuted || false}
+                                        deadlineForProsecution = {formValues.deadlineForProsecution || ''}
+                                        handleDeadlineForProsecutionChange = {handleFormChange}
+                                        preTrialPoliceDepartment = {formValues.preTrialPoliceDepartment}
+                                        handlePreTrialPoliceDepartmentChange = {handleFormChange}
                                     />
                                 </Grid>
                                 <Grid item xs={5,5}>
                                     <TextField fullWidth
-                                        name='crime' helperText='Vakavin teko (päätös tai välituomio)'id='crime' value={crime}
-                                        onChange={formFieldChange} variant='outlined' margin='normal' />
+                                        name='crime' helperText='Vakavin teko (päätös tai välituomio)'id='crime' value={formValues.crime || ''}
+                                        onChange={handleFormChange} variant='outlined' margin='normal' />
                                 </Grid>
                                 <Grid item xs={1}/>
                                 <Grid item xs={5,5}>
                                     <TextField fullWidth
-                                        name='crimes' helperText='Muut kyseessä olevat teot, joista mielentilatutkimusta pyydetään' id='crimes' value={crimes}
-                                        onChange={formFieldChange} variant='outlined' margin='normal' />
+                                        name='crimes' helperText='Muut kyseessä olevat teot, joista mielentilatutkimusta pyydetään' id='crimes' value={formValues.crimes || ''}
+                                        onChange={handleFormChange} variant='outlined' margin='normal' />
                                 </Grid>
                                 <Grid item xs={1}/>
                                 <Grid item xs={5,5}>
                                     <TextField fullWidth
-                                        name='assistantsEmail' helperText='Tutkittavan avustajan sähköposti' id='assistantsEmail' value={assistantsEmail}
-                                        onChange={formFieldChange} variant='outlined' margin='normal'
+                                        name='assistantsEmail' helperText='Tutkittavan avustajan sähköposti' id='assistantsEmail' value={formValues.assistantsEmail || ''}
+                                        onChange={handleFormChange} variant='outlined' margin='normal'
                                     />
                                 </Grid>
                                 <Grid item xs={1}/>
                                 <Grid item xs={5,5}>
                                     <TextField fullWidth
-                                        name='assistantsPhonenumber' helperText='Tutkittavan avustajan puhelinnumero' id='assistantsPhonenumber' value={assistantsPhonenumber}
-                                        onChange={formFieldChange} variant='outlined' margin='normal' />
+                                        name='assistantsPhonenumber' helperText='Tutkittavan avustajan puhelinnumero' id='assistantsPhonenumber' value={formValues.assistantsPhonenumber || ''}
+                                        onChange={handleFormChange} variant='outlined' margin='normal' />
                                 </Grid>
                                 <Grid item xs={1}/>
                                 <Grid item xs={5,5}>
                                     <TextField fullWidth
-                                        name='assistantsAddress' helperText='Tutkittavan avustajan osoite' id='assistantsAddress' value={assistantsAddress}
-                                        onChange={formFieldChange} variant='outlined' margin='normal' />
+                                        name='assistantsAddress' helperText='Tutkittavan avustajan osoite' id='assistantsAddress' value={formValues.assistantsAddress || ''}
+                                        onChange={handleFormChange} variant='outlined' margin='normal' />
                                 </Grid>
                                 <Grid item xs={1}/>
                                 <Grid item xs={5,5}>
                                     <TextField fullWidth
                                         name='legalGuardianEmail' helperText= 'Alaikäisen tutkittavan huoltajan/sosiaalitoimen sähköposti' id='legalGuardianEmail'
-                                        value={legalGuardianEmail} onChange={formFieldChange} variant='outlined' margin='normal'/>
+                                        value={formValues.legalGuardianEmail || ''} onChange={handleFormChange} variant='outlined' margin='normal'/>
                                 </Grid>
                                 <Grid item xs={1}/>
                                 <Grid item xs={5,5}>
                                     <TextField fullWidth
-                                        name='legalGuardianPhonenumber' helperText='Alaikäisen tutkittavan huoltajan/sosiaalitoimen puhelinnumero' id='legalGuardianPhonenumber' value={legalGuardianPhonenumber}
-                                        onChange={formFieldChange} variant='outlined' margin='normal' />
+                                        name='legalGuardianPhonenumber' helperText='Alaikäisen tutkittavan huoltajan/sosiaalitoimen puhelinnumero' id='legalGuardianPhonenumber'
+                                        value={formValues.legalGuardianPhonenumber || ''}
+                                        onChange={handleFormChange} variant='outlined' margin='normal' />
                                 </Grid>
                                 <Grid item xs={1}/>
                                 <Grid item xs={5,5}>
                                     <TextField fullWidth
-                                        name='legalGuardianAddress' helperText='Alaikäisen tutkittavan huoltajan/sosiaalitoimen osoite' id='legalGuardianAddress' value={legalGuardianAddress}
-                                        onChange={formFieldChange} variant='outlined' margin='normal' />
+                                        name='legalGuardianAddress' helperText='Alaikäisen tutkittavan huoltajan/sosiaalitoimen osoite' id='legalGuardianAddress'
+                                        value={formValues.legalGuardianAddress || ''}
+                                        onChange={handleFormChange} variant='outlined' margin='normal' />
                                 </Grid>
                                 <Grid item xs={1}/>
                                 <Grid item xs={5,5}>
                                     <TextField fullWidth
-                                        name='legalGuardianInstitute' helperText='Alaikäisen tutkittavan huoltajan/sosiaalitoimen mahdollinen laitos' id='legalGuardianInstitute' value={legalGuardianInstitute}
-                                        onChange={formFieldChange} variant='outlined' margin='normal' />
+                                        name='legalGuardianInstitute' helperText='Alaikäisen tutkittavan huoltajan/sosiaalitoimen mahdollinen laitos' id='legalGuardianInstitute'
+                                        value={formValues.legalGuardianInstitute || ''}
+                                        onChange={handleFormChange} variant='outlined' margin='normal' />
                                 </Grid>
                                 <Grid item xs={1}/>
                                 <Grid item xs={5,5}>
                                     <TextField fullWidth
-                                        name='appealedDecision' helperText='Mikäli lähettäjä hovioikeus/korkein oikeus, mihin päätökseen haettu muutosta' id='appealedDecision' value={appealedDecision}
-                                        onChange={formFieldChange} variant='outlined' margin='normal' />
+                                        name='appealedDecision' helperText='Mikäli lähettäjä hovioikeus/korkein oikeus, mihin päätökseen haettu muutosta' id='appealedDecision'
+                                        value={formValues.appealedDecision || ''}
+                                        onChange={handleFormChange} variant='outlined' margin='normal' />
                                 </Grid>
                             </Grid>
 

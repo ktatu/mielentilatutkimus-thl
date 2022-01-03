@@ -18,7 +18,7 @@ const validateAssistantsEmail = (admissionForm) => {
     return emailValidator.validate(admissionForm.assistantsEmail) 
 }
 
-const validateLegalGuardianEmailEmail = (admissionForm) => {
+const validateLegalGuardianEmail = (admissionForm) => {
     return emailValidator.validate(admissionForm.legalGuardianEmail)
 }
 
@@ -35,5 +35,5 @@ module.exports = {
     validateBasicInformationData,
     validatePoliceEmailAddress,
     validateAssistantsEmail,
-    validateLegalGuardianEmailEmail
+    validateLegalGuardianEmail
 }

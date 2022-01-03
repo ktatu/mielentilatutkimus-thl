@@ -7,12 +7,9 @@ const admissionService = require('../services/admissionService')
 sendAdmissionsRouter.post('/admission_form', async (req, res) => {
     const data = req.body
 
-    if (data.assistantsEmail.length>0 
-        && !HelperFunctions.validateAssistantsEmail(data) ||
-    (data.legalGuardianEmail.length>0 && !HelperFunctions.validateLegalGuardianEmailEmail(data))) {
+    if ((data.assistantsEmail && !HelperFunctions.validateAssistantsEmail(data)) || (data.legalGuardianEmail && !HelperFunctions.validateLegalGuardianEmail(data))) {
         return res.sendStatus(500)
-
-    } else {
+    }  else {
         const savedForm = await admissionService.saveAdmission(data)
         Mailer.sendConfirmation(savedForm.basicInformation.email, savedForm.diaariNumber, savedForm.id)
 
