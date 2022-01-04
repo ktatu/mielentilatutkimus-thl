@@ -1,6 +1,4 @@
-/*eslint-disable no-unused-vars */
 /*eslint-disable no-undef */
-/*eslint-disable react/display-name */
 
 import React, { useState } from 'react'
 import admissionService from '../services/admissionService'
@@ -62,8 +60,8 @@ const Form = () => {
     const [formState, setFormState] = useState(null)
 
     const [formValues, setFormValues] = useState({ preTrialPoliceDepartment: '' })
-
-    const [prescribedDate, setPrescribedDate] = useState('')
+    const [datePrescribedForPsychiatricAssesment, setDatePrescribedForPsychiatricAssesment] = useState('')
+    const [deadlineForProsecution, setDeadlineForProsecution] = useState('')
 
     const hideWhenVisible = { display: formVisible ? 'none' : '' }
     const showWhenVisible = { display: formVisible ? '' : 'none' }
@@ -105,43 +103,31 @@ const Form = () => {
         ))
     }
 
-    const handlePrescribedDateChange = (newValue) => {
-        setPrescribedDate(newValue)
+    const getFormValuesAndBasicId = () => ({
+        ...formValues,
+        datePrescribedForPsychiatricAssesment: datePrescribedForPsychiatricAssesment,
+        deadlineForProsecution: deadlineForProsecution,
+        basicInformation: senderInfo.id
+    })
+
+    const handleDatePrescribedForPsychiatricAssesment = (newValue) => {
+        setDatePrescribedForPsychiatricAssesment(newValue)
+    }
+    const handleDeadlineForProsecutionChange = (newValue) => {
+        setDeadlineForProsecution(newValue)
     }
 
     const isValidEmailAddress = (formField) => {
+        const formValue = formValues[formField]
         // only validated if field has been filled, it's not required
-        if (!formValues.formField) {
+        if (!formValue) {
             return true
         }
-        if (formValues.formField.length > 0) {
-            if (!validator.isEmail(formValues.formField)) {
-                msg.setErrorMsg(`Kenttä ${formField} on virheellisesti täytetty`, 7)
-                return false
-            }
+        if (formValue > 0 && !validator.isEmail(formValue)) {
+            return false
         }
         return true
     }
-
-    const validateAssistantsEmail = () => {
-        if (formValues.assistantsEmail.length > 0) {
-            if (!validator.isEmail(formValues.assistantsEmail)) {
-                msg.setErrorMsg('Avustajan sähköpostiosoite on virheellinen!', 7)
-                return true
-            }
-        }
-        return false
-    }
-
-    const validateLegalGuardianEmail = () => {
-        if (!validator.isEmail(legalGuardianEmail) && legalGuardianEmail.length>0) {
-            msg.setErrorMsg('Alaikäisen huoltajan/sosiaalitoimen sähköpostiosoite on virheellinen!', 7)
-            return true
-        } else {
-            return false
-        }
-    }
-
 
     const updatePerson = (event) => {
 
@@ -149,8 +135,18 @@ const Form = () => {
 
         if(formState === 'Pyydetty lisätietoja') {
 
-            const assistantUpdateError = validateAssistantsEmail()
-            const guardianUpdateError= validateLegalGuardianEmail()
+            if (!isValidEmailAddress('assistantsEmail') || !isValidEmailAddress('legalGuardianEmail')) {
+                msg.setErrorMsg('Tarkista syöttämiesi sähköpostiosoitteiden oikeellisuus', 7)
+                return            admissionService
+                .update(paramFormId, updateAdmission)
+                .then(response => {
+                    setFormId(response.data.id)
+                    toggleVisibility()
+                })
+                .catch(() => {
+                    msg.setErrorMsg('Mielentilatutkimuspyynnön muokkaamisessa tapahtui virhe!', 7)
+                })
+            }
 
             const updateAdmission = {
                 formState : 'Saatu lisätietoja',
@@ -184,6 +180,7 @@ const Form = () => {
                 researchUnit: '',
                 researchUnitInformation: ''
             }
+
             for (const value in updateAdmission) {
 
                 if (
@@ -195,17 +192,16 @@ const Form = () => {
                 }
             }
 
-            if (!assistantUpdateError && !guardianUpdateError) {
-                admissionService
-                    .update(paramFormId, updateAdmission)
-                    .then(response => {
-                        setFormId(response.data.id)
-                        toggleVisibility()
-                    })
-                    .catch(() => {
-                        msg.setErrorMsg('Mielentilatutkimuspyynnön muokkaamisessa tapahtui virhe!', 7)
-                    })
-            }
+            admissionService
+                .update(paramFormId, updateAdmission)
+                .then(response => {
+                    setFormId(response.data.id)
+                    toggleVisibility()
+                })
+                .catch(() => {
+                    msg.setErrorMsg('Mielentilatutkimuspyynnön muokkaamisessa tapahtui virhe!', 7)
+                })
+            
         } else {
             msg.setErrorMsg('Lisätietoja ei olla pyydetty', 7)
         }
@@ -219,12 +215,14 @@ const Form = () => {
         else {
             event.preventDefault()
 
+
             if (!isValidEmailAddress('assistantsEmail') || !isValidEmailAddress('legalGuardianEmail')) {
+                msg.setErrorMsg('Tarkista syöttämiesi sähköpostiosoitteiden oikeellisuus', 7)
                 return
             }
 
             admissionService
-                .create({ ...formValues, basicInformation: senderInfo.id })
+                .create(getFormValuesAndBasicId())
                 .then(response => {
                     setFormId(response.data.id)
                     toggleVisibility()
@@ -282,7 +280,6 @@ const Form = () => {
 
                         <Typography variant={'h5'}>Tutkittavan henkilön yleistiedot:</Typography>
                         <p></p>
-                        {formValues.datePrescribedForPsychiatricAssesment || ''}
                         <form onSubmit={addPerson}>
                             <Grid
                                 container
@@ -362,8 +359,8 @@ const Form = () => {
                                                 disableUnderline: true,
                                             }}
                                             inputFormat="DD/MM/YYYY"
-                                            value={prescribedDate}
-                                            onChange={handlePrescribedDateChange}
+                                            value={datePrescribedForPsychiatricAssesment}
+                                            onChange={handleDatePrescribedForPsychiatricAssesment}
                                             renderInput={(params) => <TextField name='datePrescribedForPsychiatricAssesment' id='date-picker' variant='filled' {...params} />}
                                         />
                                         <FormHelperText>Päivämäärä, jolla oikeus on määrännyt tutkittavan mielentilatutkimukseen</FormHelperText>
@@ -394,6 +391,7 @@ const Form = () => {
                                 <Grid item xs={5,5}>
                                     <FormControl >
                                         <Select
+                                            name='prosecuted'
                                             onChange={handleFormChange}
                                             value={formValues.prosecuted || false}
                                             variant = 'outlined'
@@ -409,8 +407,8 @@ const Form = () => {
                                     <NotProsecuted
                                         formValues = {formValues}
                                         prosecuted = {formValues.prosecuted || false}
-                                        deadlineForProsecution = {formValues.deadlineForProsecution || ''}
-                                        handleDeadlineForProsecutionChange = {handleFormChange}
+                                        deadlineForProsecution = {deadlineForProsecution}
+                                        handleDeadlineForProsecutionChange = {handleDeadlineForProsecutionChange}
                                         preTrialPoliceDepartment = {formValues.preTrialPoliceDepartment}
                                         handlePreTrialPoliceDepartmentChange = {handleFormChange}
                                     />
