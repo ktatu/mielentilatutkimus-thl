@@ -69,7 +69,6 @@ test('Link to admission form is sent after POST request', async () => {
         .post(baseUrl+'/basic_information_form')
         .send(basicInfo)        
         .expect(200)
-        .expect('Content-Type', /application\/json/)
 
     await new Promise((t) => setTimeout(t, 1000))
     const basicsInDb = await helper.basicsInDb()
