@@ -1,5 +1,3 @@
-/*eslint-disable no-undef */
-
 import React, { useState } from 'react'
 import admissionService from '../services/admissionService'
 import { useParams, Link } from 'react-router-dom'
@@ -137,56 +135,19 @@ const Form = () => {
 
             if (!isValidEmailAddress('assistantsEmail') || !isValidEmailAddress('legalGuardianEmail')) {
                 msg.setErrorMsg('Tarkista syöttämiesi sähköpostiosoitteiden oikeellisuus', 7)
-                return            admissionService
-                .update(paramFormId, updateAdmission)
-                .then(response => {
-                    setFormId(response.data.id)
-                    toggleVisibility()
-                })
-                .catch(() => {
-                    msg.setErrorMsg('Mielentilatutkimuspyynnön muokkaamisessa tapahtui virhe!', 7)
-                })
+                return
             }
 
             const updateAdmission = {
+                ...getFormValuesAndBasicId(),
                 formState : 'Saatu lisätietoja',
-                name: name,
-                lastname: lastname,
-                identificationNumber: identificationNumber,
-                address: address,
-                location: location,
-                processAddress: processAddress,
-                trustee: trustee,
-                citizenship: citizenship,
-                hazardAssesment: hazardAssesment,
-                diaariNumber: diaariNumber,
-                datePrescribedForPsychiatricAssesment: datePrescribedForPsychiatricAssesment,
-                nativeLanguage: nativeLanguage,
-                desiredLanguageOfBusiness: desiredLanguageOfBusiness,
-                municipalityOfResidence: municipalityOfResidence,
-                prosecuted: prosecuted,
-                deadlineForProsecution: deadlineForProsecution,
-                preTrialPoliceDepartment: preTrialPoliceDepartment,
-                crime: crime,
-                crimes: crimes,
-                assistantsEmail: assistantsEmail,
-                assistantsPhonenumber: assistantsPhonenumber,
-                assistantsAddress: assistantsAddress,
-                legalGuardianEmail: legalGuardianEmail,
-                legalGuardianPhonenumber: legalGuardianPhonenumber,
-                legalGuardianAddress: legalGuardianAddress,
-                legalGuardianInstitute: legalGuardianInstitute,
-                appealedDecision: appealedDecision,
-                researchUnit: '',
-                researchUnitInformation: ''
             }
 
             for (const value in updateAdmission) {
-
                 if (
                     updateAdmission[value] === null ||
-                updateAdmission[value] === undefined ||
-                updateAdmission[value] === ''
+                    updateAdmission[value] === undefined ||
+                    updateAdmission[value] === ''
                 ) {
                     delete updateAdmission[value]
                 }
@@ -201,7 +162,7 @@ const Form = () => {
                 .catch(() => {
                     msg.setErrorMsg('Mielentilatutkimuspyynnön muokkaamisessa tapahtui virhe!', 7)
                 })
-            
+
         } else {
             msg.setErrorMsg('Lisätietoja ei olla pyydetty', 7)
         }
@@ -246,7 +207,6 @@ const Form = () => {
 
 
     return (
-
         <div>
             <div style={showWhenVisible}>
                 <div style={{

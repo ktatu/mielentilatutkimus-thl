@@ -1,5 +1,4 @@
-/* eslint-disable no-unused-vars */
-import React, { useEffect } from 'react'
+import React from 'react'
 import ThlAdmissions from './components/ThlAdmissions'
 import LoginForm from './components/LoginView'
 import jwtDecode from 'jwt-decode'
