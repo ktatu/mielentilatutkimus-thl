@@ -5,11 +5,11 @@ const jwt = require('jsonwebtoken')
 const  verifyToken = (req, res, next) => {
     let token = req.headers['x-access-token']
     if (!token) {
-        return res.status(403)
+        return res.sendStatus(403)
     }
     jwt.verify(token, config.TOKEN_SECRET, (err, decoded) => {
         if (err) {
-            return res.status(401)
+            return res.status(401).json({ error: 'token error, try to relog' })
         }
         req.username = decoded.username
         req.role = decoded.role

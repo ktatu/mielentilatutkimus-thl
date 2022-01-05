@@ -1,7 +1,8 @@
 /* eslint-disable no-unused-vars */
-import React from 'react'
+import React, { useEffect } from 'react'
 import ThlAdmissions from './components/ThlAdmissions'
 import LoginForm from './components/LoginView'
+import jwtDecode from 'jwt-decode'
 
 import { useStyles, theme } from './styles'
 
@@ -13,7 +14,15 @@ import { ThemeProvider, StyledEngineProvider } from '@mui/material'
 const App = () => {
     const classes = useStyles()
 
-    const loggedIn = () => localStorage.getItem('user') === null ? false : true
+    const loggedIn = () => {
+        let user = JSON.parse(localStorage.getItem('user'))
+        return user && !tokenIsExpired(user.accessToken)
+    }
+
+    const tokenIsExpired = token => {
+        let decodedToken = jwtDecode(token)
+        return decodedToken.exp * 1000 < Date.now() ? true : false
+    }
 
     const AdmissionsRoute = () => (
         <div>
