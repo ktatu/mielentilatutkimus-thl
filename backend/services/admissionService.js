@@ -50,18 +50,18 @@ const getAdmission = async (id, username, role) => {
 
 const getAdmissionForEdit = async (id) => {
     const form = await AdmissionForm.findById(id)
-        .select('admissionNoteSenderOrganization admissionNoteSender sendersEmail sendersPhoneNumber formState')
+        .select('basicInformation formState')
+    await form.populate('basicInformation')
 
     form.log({
         action: 'get_admission_form',
         category: 'admission_form',
-        createdBy: form ? form.sender : 'user not found',
-        createdByRole: form ? form.organization : 'undefined',
+        createdBy: form ? form.basicInformation.sender : 'user not found',
+        createdByRole: form ? form.basicInformation.organization : 'undefined',
         message: 'Tutkimuspyynnön lähettäjän tiedot haettu lisätietojen täydennystä varten'
     })
 
     return form.toJSON()
-    
 }
 
 const updateAdmission = async (id, data, username, role) => {
