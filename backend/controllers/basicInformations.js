@@ -23,12 +23,7 @@ basinInformationsRouter.post('/basic_information_form', async (req, res) => {
         res.sendStatus(400)
     } else {
         const savedForm = await basicInformationForm.save()
-        const response = [
-            savedForm.organization,
-            savedForm.sender,
-            savedForm.email,
-            savedForm.phoneNumber
-        ]
+
         res.sendStatus(200)
         Mailer.sendLinkToAdmissionForm(savedForm.email, savedForm.id)
     }
