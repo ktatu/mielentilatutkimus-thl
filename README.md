@@ -26,6 +26,8 @@ Linkit dokumentteihin:
 
 ## Asennusohje
 
+Sovelluksen kehitys on tapahtunut Ubuntun versiolla 18.04, eivätkä mm. package.json-tiedostojen komennot välttämättä toimi muilla käyttöjärjestelmillä.
+
 ### Repositorion lataaminen
 
 Suorita terminaalissa komento:
