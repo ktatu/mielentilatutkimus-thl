@@ -168,6 +168,18 @@ Cypress.Commands.add('sendEditedForm', ( data ) => {
     )
 })
 
+Cypress.Commands.add('setShortLoginToken', () => {
+
+    return cy.request({
+        url: 'http://localhost:3001/tests/short_token',
+        method: 'POST',
+        body: { 'user': 'cypress', 'role': 'THL' }
+    }).then(response => {
+        const user = response.body
+        localStorage.setItem('user', JSON.stringify(user))
+    })
+})
+
 Cypress.Commands.overwrite('click', (originalFn, selector, options = {}) => {
     options.force = true
     return originalFn(selector, options) })

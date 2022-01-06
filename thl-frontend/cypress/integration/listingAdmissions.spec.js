@@ -52,6 +52,24 @@ before(function() {
     })
 })
 
+describe('Redirect to login page occurs when', () => {
+
+    it('user has not logged in', () => {
+        localStorage.removeItem('user')
+
+        cy.visit('http://localhost:3002/thl/thl-admissions')
+        cy.contains('Kirjaudu sisään')
+    })
+
+    it('token has expired', () => {
+        cy.setShortLoginToken()
+        cy.wait(6000)
+
+        cy.visit('http://localhost:3002/thl/thl-admissions')
+        cy.contains('Kirjaudu sisään')
+    })
+})
+
 describe('All admissions can be viewed', () => {
 
     it('New admission can be viewed', function () {
